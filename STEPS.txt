@@ -1,0 +1,348 @@
+https://www.youtube.com/watch?v=m34FCkBd7UU&t=109s
+MEAN Stack User Registration Using Node JS - Part 1
+
+https://www.youtube.com/watch?v=V9zDNfVs7Z4&t=135s
+MEAN Stack User Registration Form With Angular 6 - Part 2
+
+
+SERVER SIDE
+
+############################################################################################################################################################################################
+
+1. CREATED A PROJECT FOLDER>Right Click>GitBash>npm init>entry point>app.js>type yes
+
+Comment 
+npm init is to initialise your Node.js project. 
+That's usually the first step before installing any Node dependencies
+
+Let's install our dependencies or packages for this project.
+
+npm i --save express mongoose body-parser bcryptjs cors
+
+############################################################################################################################################################################################
+
+2.SETUP MONGODB COMPBASS COMMUNITY
+
+Install mongodb community
+https://www.mongodb.com/try/download/community
+
+https://www.youtube.com/watch?v=6_NSkDRXPZk
+How to install MongoDB on Windows 10/11 [2022 Update] Step by Step guide for Command-Line & GUI
+
+Go to bin folder path of your mongoDB from program files copy the path
+C:\Program Files\MongoDB\Server\6.0\bin
+
+Edit the System Environment Variables>Advanced>Under System Variables>Click Path>Edit>New
+Paste the below path
+C:\Program Files\MongoDB\Server\6.0\bin\mongo.exe
+Click OK
+
+Go to terminal
+mongod --version
+mongos --version
+
+#####
+
+SETUP BAT FILE FOR MONGODB: Create a below folder on this path C:\Users\Default
+mongo-data
+Open a notepad and paste the below link, and save on your desktop as startmongodb.bat
+
+cd C:\Program Files\MongoDB\Server\6.0\bin
+mongod.exe --dbpath C:\Users\Default\mongo-data
+
+Comment	  
+to make this work, right click this bat file>then run as administrator.
+
+#####
+
+Create Database Name from MongoDB Compass
+
+Click MongoDB Compass App
+Click Connect
+Click the + symbol
+Database Name-  meanstackdb
+Collection Name - users
+CreateDatabase
+
+
+############################################################################################################################################################################################
+
+
+SETUP CONFIGURATION for YOUR NODE ENVIRONMENT: DEVELEPMENT, PRODUCTION
+
+in your main project folder
+create a folder called config>then create config.json and config.js
+mongodb://localhost:27017/meanstackdb
+
+#####
+
+in config.json
+
+Comment
+Basically config.json file is created to store our json object.
+Our json object is a key value pairs. We have development and production key with it's corrrespoding values as key value pairs as well.
+This will be our node environment.
+
+
+
+{
+"development":{
+    "PORT": 3000,
+    "MONGODB_URI" : "mongodb://localhost:27017/meanstackdb"
+
+     We should use the below connection string insted of the above or else it will give you connect ECONNREFUSED ::1:27017".
+    "MONGODB_URI" : "mongodb://0.0.0.0:27017/meanstackdb"
+
+},
+
+"production": {
+    "PORT": 80,
+    "MONGODB_URI" : "mongodb://xxxxx/DB_NAME"
+}
+
+}
+
+#####
+
+in config.js
+
+We created this config.js file because we want to play around the key  in our json object above.
+
+
+
+var env = process.env.NODE_ENV || "development";
+var config = require ("./config.json")
+var envConfig = config[env];
+Object.keys(envConfig).forEach(key=> process.env[key] = envConfig [key]);
+
+
+#####
+
+in our main project folder create app.js then
+
+require("./config/config");
+
+
+12:00
+
+############################################################################################################################################################################################
+
+
+LET'S CONNECT TO OUR DATABASE
+
+Comment
+Why we were able to access MONGODB_URI property since we have not require the config module in this file?
+
+in the main project folder>create models FOLDER>then create a file db.js
+
+const mongoose = require ("mongoose");
+mongoose.set('strictQuery', false);
+mongoose.connect (process.env.MONGODB_URI, (err)=>{
+ if (!err){console.log("MongoDb Connection Succeeded.")}
+ else{console.log ("Error in MongoDB Connection" + JSON.stringify(err, undefined, 2))}
+});
+
+
+
+#####
+
+in our main project folder create
+In app.js let's require our db.js file
+require("./models/db");
+
+#####
+
+
+
+ERROR
+connect ECONNREFUSED ::1:27017"
+Solution:
+ "MONGODB_URI" : "mongodb://0.0.0.0:27017/meanstackdb"
+
+Right Click the Project Folder>node app.js let's see if the app is working.
+
+
+13:56
+
+#############################################################################################################
+
+Let's update our app.js
+
+require("./config/config");
+require("./models/db");
+
+const express = require ("express");
+var app = express ();
+const cors = require ('cors');
+const bodyParser = require ("body-parser");
+
+
+
+app.use(cors());
+app.use(bodyParser.json());
+
+
+
+app.listen(process.env.port, ()=>{console.log (`Server started at port: ${process.env.PORT}`)})
+
+16:00
+
+#############################################################################################################
+
+3. in models FOLDER>create user.model.js file
+We are creatinga mongoose model for our user.
+
+
+const mongoose = require ("mongoose");
+const userSchema = new mongoose.Schema({
+ fullName:{type: String},
+ email:{type: String},
+ password:{type: String},
+ saltSecret: String
+});
+
+mongoose.model("User", userSchema);
+//to invoke or call our mongoose model.
+
+
+then in our db.js
+require("./user.model");
+
+#############################################################################################################
+https://www.youtube.com/watch?v=m34FCkBd7UU&t=109s
+18:46
+
+4.  Create a Controller for User Registration
+
+in main project folder, create controllers folder, then user.controller.js file
+in user.controller.js file add the below syntax
+
+module.exports.register = (req, res, next) =>{
+
+  
+}
+
+
+5.  in main project folder, create routes folder, then index.router.js
+in index.router.js
+
+
+const express = require ("express");
+const router = express.Router();
+const ctrlUser = require ("../controllers/user.controller");
+router.post("/register", ctrlUser.register);
+module.exports = router;
+
+21:52
+
+
+then in app.js let's require our index.router.js
+const rtsIndex = require ("./routes/index.router");
+app.use("/api", rtsIndex);
+
+
+
+in user.controller.js, just add  console.log ("Inside Register Function");
+
+module.exports.register = (req, res, next) => {
+    console.log ("Inside Register Function");
+}
+
+
+23:17
+
+
+let's test the post request. Go to postman
+POSTMAN
+localhost:3000/api/register
+let's see if we can invoke the Inside register function string. See the result on the terminal.
+
+24:40
+
+
+#############################################################################################################
+
+6.in user.controller.js add the below code
+const mongoose = require ("mongoose");
+const User = mongoose.model("User");
+
+then update
+module.exports.register = (req, res, next) => {
+    console.log ("Inside Register Function");
+}
+
+
+with this code
+
+
+
+
+module.exports.register = (req, res, next) => {
+    var user = new User();
+    user.fullName = req.body.fullName;
+    user.email = req.body.email;
+    user.password = req.body.password;
+    user.save((err, doc)=>{
+        if(!err) res.send(doc);
+    });
+};
+
+
+
+27:32
+
+7. in our user.model.js let's add bcrypt
+const bcrypt = require ("bcryptjs");
+
+
+also add pre event for our userSchema
+
+//events, this function will be invoke before the save operation
+userSchema.pre("save", function (next){
+    bcrypt.genSalt(10, (err, salt)=>{
+        bcrypt.hash(this.password, salt, (err, hash)=>{
+            this.password = hash;
+            this.saltSecret = salt;
+            next();
+        });
+    });
+});
+
+
+Let's test our app. Go to postman
+
+POST localhost:3000/api/register
+Body>raw>JSON
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
